@@ -5,16 +5,23 @@ export class Pokemon {
     isDead
     #elHP
     #elProgressbar
+    #elImg
     #defaultHP
     #damageHP
 
-    constructor(name, elHP, elProgressbar) {
+    constructor({ name, selector, hp, attacks = [], img}) {
         this.name = name
-        this.#elHP = elHP
-        this.#elProgressbar = elProgressbar
-        this.#defaultHP = 100
-        this.#damageHP = 100
+        this.#elHP = document.querySelector(`#health-${selector}`),
+        this.#elProgressbar = document.querySelector(`#progressbar-${selector}`)
+        this.#defaultHP = hp
+        this.#damageHP = hp
         this.isDead = false
+        this.attacks = attacks
+        
+        this.#elProgressbar.classList.remove('critical', 'low')
+        const elImg = document.querySelector(`#img-${selector}`)
+        elImg.src = img
+        this.renderHP()
     }
 
     renderHP() {
@@ -27,10 +34,19 @@ export class Pokemon {
     }
 
     #renderProgressbarHP() {
-        this.#elProgressbar.style.width = this.#damageHP + '%';
+        this.#elProgressbar.style.width = this.#damageHP * 100 / this.#defaultHP + '%';
+
+        const width = parseFloat(this.#elProgressbar.style.width)
+
+        if (width < 20) {
+            this.#elProgressbar.classList.add('critical')
+        } else if (width < 60) {
+            this.#elProgressbar.classList.add('low')
+        }
     }
 
     #generateLog({ name }, damaged) {
+        // Template Strings
         const logs = [
             `${this.name} вспомнил что-то важное, но неожиданно ${name}, не помня себя от испуга, ударил в предплечье врага. -${damaged}, [${this.#damageHP}/${this.#defaultHP}]`,
             `${this.name} поперхнулся, и за это ${name} с испугу приложил прямой удар коленом в лоб врага. -${damaged}, [${this.#damageHP}/${this.#defaultHP}]`,
